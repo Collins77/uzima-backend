@@ -22,6 +22,10 @@ app.use(cors({
     optionsSuccessStatus: 204
   }));
 
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+
 // Routes
 const userRoutes = require('./routes/userRoutes');
 const planRoutes = require('./routes/planRoutes');
