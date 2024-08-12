@@ -1,7 +1,7 @@
 const OpenAI = require('openai');
 
 const openai = new OpenAI({
-  apiKey: "sk-TbqbrYV0sH63eLYSPhw4B5eGLO3DRu5MpZt9F240vuT3BlbkFJ7RFQCC4E-L0XgwcL_F56cbm0MlguhavPZbKl0lU2kA",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 async function createThread() {
