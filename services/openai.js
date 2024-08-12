@@ -26,7 +26,7 @@ async function runAssistant(threadId) {
     const response = await openai.beta.threads.runs.create(
         threadId,
         { 
-          assistant_id: "asst_5HQ5ZlbHH7EAieBqPLykbU9x"
+          assistant_id: process.env.ASSISTANT_ID
           // Make sure to not overwrite the original instruction, unless you want to
         }
       );
