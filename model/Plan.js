@@ -15,6 +15,15 @@ const planSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  duration: {
+    type: Number,
+    required: true,
+  },
+  type: {
+    type: String,
+    enum: ["personal", "corporate"],
+    required: true,
+  },
 }, { timestamps: true });
 
 const Plan = mongoose.model('Plan', planSchema);

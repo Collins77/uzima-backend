@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { authenticator } = require('otplib');
 const speakeasy = require('speakeasy');
 
-const FRONTEND = 'https://test.ai.uzima.ai'
+const FRONTEND = 'https://uzima.ai'
 
 const register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;

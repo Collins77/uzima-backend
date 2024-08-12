@@ -132,6 +132,7 @@ app.post('/api/chat', async (req, res) => {
 
 // Routes
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const planRoutes = require('./routes/planRoutes');
 const companyRoutes = require('./routes/companyRoutes');
 const chatRoutes = require('./routes/chats');
@@ -141,6 +142,7 @@ const assistantRoutes = require('./routes/assistantRoutes');
 
 
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/chats', chatRoutes);

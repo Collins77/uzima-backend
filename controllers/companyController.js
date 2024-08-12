@@ -60,8 +60,8 @@ const registerCompanyUser = async (req, res) => {
   const { companyId, firstName, lastName, email } = req.body;
 
   try {
-    
-    if(!companyId || !firstName || !lastName || !email) {
+
+    if (!companyId || !firstName || !lastName || !email) {
       return res.status(404).json({ message: 'Please provide all the details' });
     }
     // Generate and hash a new password
@@ -70,13 +70,13 @@ const registerCompanyUser = async (req, res) => {
 
     // Create new user with company details
     const newUser = new User({
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        companyId,
-        registeredByCompany: true,
-        firstLogin: true, // Indicate that the user must change the password on first login
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      companyId,
+      registeredByCompany: true,
+      firstLogin: true, // Indicate that the user must change the password on first login
     });
 
     await newUser.save();
@@ -85,9 +85,9 @@ const registerCompanyUser = async (req, res) => {
     await sendEmail(email, 'Your New Account Credentials', `Your account has been created. Here are your credentials:\n\nEmail: ${email}\nPassword: ${password}\n\nPlease log in and change your password.`);
 
     res.status(201).json({ message: 'User registered successfully', user: newUser });
-} catch (error) {
+  } catch (error) {
     res.status(500).json({ message: 'Error registering user', error });
-}
+  }
 }
 
 const editCompany = async (req, res) => {

@@ -1,10 +1,7 @@
 const OpenAI = require('openai');
-const dotenv = require('dotenv');
-dotenv.config();
-
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: "sk-TbqbrYV0sH63eLYSPhw4B5eGLO3DRu5MpZt9F240vuT3BlbkFJ7RFQCC4E-L0XgwcL_F56cbm0MlguhavPZbKl0lU2kA",
 });
 
 async function createThread() {
@@ -29,7 +26,7 @@ async function runAssistant(threadId) {
     const response = await openai.beta.threads.runs.create(
         threadId,
         { 
-          assistant_id: process.env.ASSISTANT_ID
+          assistant_id: "asst_5HQ5ZlbHH7EAieBqPLykbU9x"
           // Make sure to not overwrite the original instruction, unless you want to
         }
       );
