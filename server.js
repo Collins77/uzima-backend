@@ -135,7 +135,7 @@ const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const planRoutes = require('./routes/planRoutes');
 const companyRoutes = require('./routes/companyRoutes');
-const chatRoutes = require('./routes/chats');
+const chatRoutes = require('./routes/chatRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const userChatsRoutes = require('./routes/userChatsRoutes');
 const assistantRoutes = require('./routes/assistantRoutes');
@@ -145,10 +145,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/company', companyRoutes);
-app.use('/api/chats', chatRoutes);
+app.use('/api/assistant', chatRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/userchats', userChatsRoutes);
-app.use('/api/assistant', assistantRoutes);
+// app.use('/api/assistant', assistantRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

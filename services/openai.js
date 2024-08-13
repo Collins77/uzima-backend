@@ -1,14 +1,17 @@
 const OpenAI = require('openai');
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPEN_API_KEY,
 });
+
+let pollingInterval;
 
 async function createThread() {
     console.log('Creating a new thread...');
     const thread = await openai.beta.threads.create();
     return thread;
 }
+
 async function addMessage(threadId, message) {
     console.log('Adding a new message to thread: ' + threadId);
     const response = await openai.beta.threads.messages.create(
