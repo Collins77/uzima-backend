@@ -18,10 +18,7 @@ const checkPromptLimit = async (userId) => {
         
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
         
-        console.log(`Checking prompt limit for user ${userId}`);
-        console.log(`Today's date: ${today}`);
-        console.log(`User's last reset: ${user.lastPromptReset}`);
-        console.log(`User's prompts today: ${user.promptsToday}`);
+        
         
         // Reset prompt count if it's a new day
         if (user.lastPromptReset !== today) {
@@ -32,7 +29,7 @@ const checkPromptLimit = async (userId) => {
         }
 
         // Define the daily limit for the free plan
-        const freePlanLimit = 5; // Example limit
+        const freePlanLimit = 100; // Example limit
 
         // Check if the user has exceeded their daily limit
         if (user.planId.name === 'Free' && user.promptsToday >= freePlanLimit) {
