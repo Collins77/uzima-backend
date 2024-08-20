@@ -21,7 +21,7 @@ const planSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["personal", "corporate"],
+    enum: ["daily", "monthly"],
     required: true,
   },
 }, { timestamps: true });

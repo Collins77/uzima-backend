@@ -139,6 +139,7 @@ const chatRoutes = require('./routes/chatRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const userChatsRoutes = require('./routes/userChatsRoutes');
 const assistantRoutes = require('./routes/assistantRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 
 app.use('/api/users', userRoutes);
@@ -148,6 +149,7 @@ app.use('/api/company', companyRoutes);
 app.use('/api/assistant', chatRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/userchats', userChatsRoutes);
+app.use('/api/payment', paymentRoutes);
 // app.use('/api/assistant', assistantRoutes);
 
 app.listen(port, () => {

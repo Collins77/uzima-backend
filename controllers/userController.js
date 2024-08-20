@@ -19,7 +19,7 @@ const register = async (req, res) => {
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'User with this email is already registered.' });
     }
 
     // Hash the password
@@ -156,4 +156,41 @@ const disableOtp = async (req, res) => {
   }
 };
 
-module.exports = { register, verifyEmail, login, verifyOtp, disableOtp };
+const checkPromptLimit = async (req, res, next) => {
+  const { userId } = req.body;
+
+  try {
+      const user = await User.findById(userId).populate('planId');
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      const currentDate = new Date();
+
+      // Check if the user is on the free plan
+      if (user.planId.name === 'Free') {
+          // Reset the prompt count if it's a new day
+          const lastReset = new Date(user.lastPromptReset);
+          if (lastReset.toDateString() !== currentDate.toDateString()) {
+              user.promptsToday = 0;
+              user.lastPromptReset = currentDate;
+              await user.save();
+          }
+
+          // Check if the user has reached their daily limit
+          if (user.promptsToday >= 5) {
+              return res.status(403).json({ message: 'Daily prompt limit reached. Upgrade your plan to send more prompts.' });
+          }
+      }
+
+      // Increment the prompt count
+      user.promptsToday += 1;
+      await user.save();
+
+      next();
+  } catch (error) {
+      res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+module.exports = { register, verifyEmail, login, verifyOtp, disableOtp, checkPromptLimit };
