@@ -10,11 +10,11 @@ const { getPlanbyId } = require('./planController');
 
 
 
-const clientId = "PEeoj83fPgqLrqeRUGmoJQsWOzffNh33lGHqnfXS";
-const clientSecret = "7bRCA1sbZySE9L3c6Twkm6DfDFW9eFivKZmy9xROUoUYEBaT0luPooxmUKj2rb7L0gRU1jiw64b8wYlryHtMNlzpZHzHYcR8kpuvahDIh9M53uJ1AHhzO5QVyWgoDjhb";
+const clientId = "nu5bmWoWpUzZGEtz3LRmIuYFwpog1TvHbZAGPxdq";
+const clientSecret = "Rdr7i9oUtNpdHUfM3jTYXEE2hEPzxK6P7E624B443fJHmwL1gElF87YZftv1W2phxgpK9WOFkUUFVHFZpU0K4i9XxUuTStaLByP3ohoy4yQiTkdgmtEolMnJetORRyiN";
 const tokenUrl = "https://sandbox.sasapay.app/api/v1/auth/token/?grant_type=client_credentials";
 const confirmUrl = "https://7626-197-232-60-144.ngrok-free.app/confirm";
-const callbackurl = "https://4351-41-139-202-31.ngrok-free.app/api/v1/payment/c2b-callback-results";
+const callbackurl = "https://bf81-41-139-202-31.ngrok-free.app/api/payment/c2b-callback-results";
 
 // Convert the credentials
 const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
@@ -43,8 +43,7 @@ const requestPayment = async (req, res) => {
     
   try {
     const token = await getToken();
-    const planType = await getPlanbyId(planid);
-    console.log('plan details',myplan.name)
+    
 
 
     const {
@@ -61,6 +60,8 @@ const requestPayment = async (req, res) => {
       // planType,
       planid
     } = req.body;
+    const planType = await getPlanbyId(planid);
+    console.log('plan details',planType.name)
 
     console.log("Request body:", req.body);
 
@@ -69,12 +70,11 @@ const requestPayment = async (req, res) => {
       userId,
       username,
       email,
-      // planType,
       planid
     };
     
 
-    const jsonString = JSON.stringify(paymentDetails);
+    const jsonString = JSON.stringify({paymentDetails});
     const urlEncodedPaymentData = encodeURIComponent(jsonString);
     const CallBackURL = callbackurl;
     console.log(CallBackURL);
@@ -145,6 +145,7 @@ const handleCallback = async (req, res) => {
 //choose plan and update dates
 // Function to update user's plan
 const updateUserPlan = async (userId, planType) => {
+  console.log(planType);
     try {
       const user = await User.findById(userId);
   
@@ -164,7 +165,7 @@ const updateUserPlan = async (userId, planType) => {
         case "yearly":
           newEndDate = new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
           break;
-        case "daily":
+        case "Daily":
           newEndDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
           break;
         
@@ -176,9 +177,9 @@ const updateUserPlan = async (userId, planType) => {
       }
   
       user.plan = planType;
-      user.startdate = currentDate;
-      user.enddate = newEndDate;
-      user.transactionStatus = "success"; // Assuming this is set to success upon payment
+      // user.subscriptionStartDate = currentDate;
+      // user.subscriptionEndDate = newEndDate;
+      user.transactionStatus = true; // Assuming this is set to success upon payment
   
       await user.save();
   

@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  transactionStatus:{
+    type: Boolean,
+    default: false,
+  },
   otpSecret: {
     type: String,
   },
@@ -53,7 +57,7 @@ const userSchema = new mongoose.Schema({
   },
   plan:{
     type:String,
-    default:String
+    default:null,
   },
   subscriptionStartDate: {
     type: Date,
