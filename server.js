@@ -81,7 +81,7 @@ async function checkingStatus(res, threadId, runId) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({
-    origin: '*', // You can restrict this to specific origins if needed
+    origin: 'https://uzima.ai', // You can restrict this to specific origins if needed
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204
