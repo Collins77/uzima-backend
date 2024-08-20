@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema({
   },
   plan:{
     type:String,
-    default:null,
+    default: null,
   },
   subscriptionStartDate: {
     type: Date,
