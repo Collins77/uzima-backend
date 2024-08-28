@@ -4,6 +4,8 @@ const sendEmail = require('../utils/email');
 const jwt = require('jsonwebtoken');
 const { authenticator } = require('otplib');
 const speakeasy = require('speakeasy');
+const fs = require('fs');
+const path = require('path');
 
 const FRONTEND = 'https://uzima.ai'
 
@@ -98,6 +100,11 @@ const login = async (req, res) => {
       await sendEmail(user.email, 'OTP Code', `Your OTP code is ${otp}`);
       return res.json({ message: 'OTP sent to your email.', otpRequired: true });
     } else {
+      // Update user's active status and last login time
+      user.isActive = true;
+      user.lastLogin = new Date();
+      await user.save();
+
       // Generate JWT token if OTP is not enabled
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
       return res.json({ token, user });
@@ -105,6 +112,118 @@ const login = async (req, res) => {
   } catch (error) {
     console.error('Error during login:', error.message);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const updateUserMood = async (req, res) => {
+  const { userId, mood } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const existingRecord = user.moods.find(record => record.date === today);
+
+    if (existingRecord) {
+      existingRecord.mood = mood;
+    } else {
+      user.moods.push({ date: today, mood });
+    }
+
+    await user.save();
+
+    res.status(200).json({ message: 'Mood updated successfully.', moods: user.moods });
+  } catch (error) {
+    console.error('Error updating mood:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+const updateUser = async (req, res) => {
+  const { id } = req.params; // Get user ID from URL parameters
+    const { firstName, lastName, email } = req.body;
+
+    try {
+        // Find and update the user
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        user.firstName = firstName || user.firstName;
+        user.lastName = lastName || user.lastName;
+        user.email = email || user.email;
+
+        await user.save();
+
+        res.status(200).json({ message: 'User details updated successfully.', user });
+    } catch (error) {
+        console.error('Error updating user details:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
+const changePassword = async (req, res) => {
+  const { id } = req.params; // Assuming userId is retrieved from the JWT token in the middleware
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Check if the current password matches
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+
+    // Check if the new password is different from the current password
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ message: 'New password must be different from the current password.' });
+    }
+
+    // Validate new password (you can add your own criteria here)
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: 'New password must be at least 8 characters long.' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the password in the database
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password changed successfully.' });
+  } catch (error) {
+    console.error('Error changing password:', error.message);
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+
+const getUserDetails = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+      const user = await User.findById(id);
+      if (!user) {
+          return res.status(404).json({ message: 'User not found.' });
+      }
+
+      res.status(200).json({ user });
+  } catch (error) {
+      console.error('Error fetching user details:', error);
+      res.status(500).json({ message: 'Server error.' });
   }
 };
 
@@ -193,4 +312,83 @@ const checkPromptLimit = async (req, res, next) => {
   }
 };
 
-module.exports = { register, verifyEmail, login, verifyOtp, disableOtp, checkPromptLimit };
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const oldUser = await User.findOne({email});
+    if(!oldUser) {
+      return res.status(400).json({ message: 'User not found'});
+    }
+    //token
+    const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "20m",
+    });
+    const link = `https://uzima-backe.vercel.app/api/users/reset-password/${oldUser._id}/${token}`;
+    // const link = `http://localhost:5000/api/users/reset-password/${oldUser._id}/${token}`;
+    const emailTemplatePath = path.join(__dirname, '..', 'views', 'forgotPassword.html');
+    const emailTemplate = fs.readFileSync(emailTemplatePath, 'utf8');
+
+    // Replace placeholders with actual values
+    const formattedTemplate = emailTemplate
+        .replace('{{firstName}}', oldUser.firstName)
+        .replace('{{link}}', link)
+
+    // Send an email with the formatted template
+    // await sendMail({
+    //     email: oldUser.email,
+    //     subject: "Password Reset",
+    //     html: formattedTemplate,
+    // });
+    await sendEmail(oldUser.email, 'Password Reset', `Click on this link to reset your password, ${link}`);
+    return res.status(200).json({ message: 'Check your email' })
+  } catch (error) {
+    
+  }
+}
+
+const resetPassword = async (req, res) => {
+  const {id, token} = req.params;
+  const oldUser = await User.findOne({_id: id})
+  if(!oldUser) {
+    return res.status(400).json({ message: "User does not exist" });
+  }
+  try {
+    const verify = jwt.verify(token, process.env.JWT_SECRET);
+    res.render('forgot', { email: verify.email, status:"not verified" })
+  } catch (error) {
+    res.send("Not verified")
+  }
+
+}
+
+const resetPasswordComplete = async (req, res) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+
+  try {
+    // Verify the JWT token
+    const verify = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Hash the new password
+    const encryptedPassword = await bcrypt.hash(password, 10);
+
+    // Update the password for the Reseller document
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { password: encryptedPassword },
+      { new: true } // To return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+
+    // Password successfully updated, render a response
+    res.render("forgot", { email: verify.email, status: "verified" });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+
+}
+
+module.exports = { register, changePassword, updateUserMood, getUserDetails, updateUser, verifyEmail, login, verifyOtp, disableOtp, checkPromptLimit, resetPassword, resetPasswordComplete, forgotPassword  };

@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+const MoodEntrySchema = new mongoose.Schema({
+  mood: { type: String, required: true },
+  date: { type: Date, default: Date.now },  // Store the date of the mood entry
+});
+
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -43,7 +48,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  transactionStatus:{
+  transactionStatus: {
     type: Boolean,
     default: false,
   },
@@ -55,8 +60,8 @@ const userSchema = new mongoose.Schema({
     ref: 'Plan',
     default: '66addc7680a7383656304b26',
   },
-  plan:{
-    type:String,
+  plan: {
+    type: String,
     default: null,
   },
   subscriptionStartDate: {
@@ -70,11 +75,14 @@ const userSchema = new mongoose.Schema({
   promptsToday: {
     type: Number,
     default: 0
-},
-lastPromptReset: {
+  },
+  lastPromptReset: {
     type: String, // Date in YYYY-MM-DD format
     default: new Date().toISOString().split('T')[0]
-},
+  },
+  isActive: { type: Boolean, default: false },
+  lastLogin: { type: Date, default: null },
+  moods: { type: [MoodEntrySchema], default: [] } 
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
