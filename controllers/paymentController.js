@@ -9,12 +9,23 @@ const { getPlanbyId } = require('./planController');
 // monthly5000,daily250,yearly individual55000 yearly corporate5000/employee
 
 
+//local
+// const clientId = "wB0A457offQBTSlyGonIHPFZDC9Sg8E7qLysRirL";
 
-const clientId = "FhIs8TMKTYqEiurheIZjh9rgnOLFugLeXvTkCcz8";
-const clientSecret = "tI43g1ExbEva6ewZgcj9QsiMPgH75ylFoD0WJaUoZGqHJncrXUuMYrh6EegOOBM08vYT5xzyt81GtYEA4gslKWlQ0Jc9RXmKA743Hcio4Gh5vdzZ3pc74VMJSsmYg2B0";
+
+//live
+const clientId = "rpHZgBnYOOgELY6AaWrjhZ4pUOo8WBOkLZbWJ87f";
+
+//local
+// const clientSecret = "X8uYzrhwAQ7S3VG6V0ltwDaRqnDGXTXbfJ3Lymfu3jf6wzzOmucHkAVEQBRPn9FhEfrdqIu2994VYE6AGBsf9kVHo7Za65iZ990KdhmfQQBHejUmFg7MHsXkrt7vNU4M";
+
+
+//live
+const clientSecret = "1LHXslu0zjToFXOhUhxUUGEIWcRbeFUtziwdzzcm89xA95cAVBA94xpTiU8v2Op3RfP9NPqSJpMIevnuk4lRbeQenxnlLmZMBORb57hWMwMUggiTXRSO3jbHFt2ZMFEE";
 const tokenUrl = "https://sandbox.sasapay.app/api/v1/auth/token/?grant_type=client_credentials";
 const confirmUrl = "https://7626-197-232-60-144.ngrok-free.app/confirm";
-const callbackurl = "https://0edd-197-232-60-144.ngrok-free.app/api/payment/c2b-callback-results";
+// const callbackurl = "https://a57b-197-232-60-144.ngrok-free.app/api/payment/c2b-callback-results";
+const callbackurl = "https://uzima-backe.vercel.app/api/payment/c2b-callback-results";
 
 // Convert the credentials
 const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
@@ -72,7 +83,8 @@ const requestPayment = async (req, res) => {
       userId,
       username,
       email,
-      planid
+      planid,
+      planName
     };
     
 
@@ -130,7 +142,7 @@ const handleCallback = async (req, res) => {
       try {
         const transactionId = callbackData.CheckoutRequestID;
         // const planType = "daily"; // Example: you can determine this from the transaction details or request
-        await updateUserPlan(jsonData.paymentDetails.userId,jsonData.paymentDetails.planid);
+        await updateUserPlan(jsonData.paymentDetails.userId,jsonData.paymentDetails.planid,jsonData.paymentDetails.planName);
         console.log('Transaction ID', transactionId);
         res.status(200).json("ok");
       } catch (error) {
@@ -148,53 +160,105 @@ const handleCallback = async (req, res) => {
 
 //choose plan and update dates
 // Function to update user's plan
-const updateUserPlan = async (userId, planid) => {
-  console.log("my plan type",planid);
-    try {
-      const user = await User.findById(userId);
+// const updateUserPlan = async (userId, planid,planname) => {
+//   console.log("my plan type",planid);
+//   console.log("my plan name",planname);
+//     try {
+//       const user = await User.findById(userId);
       
   
-      if (!user) {
-        console.error(`User with ID ${userId} not found.`);
-        return;
-      }
-      console.log("selected user",user);
+//       if (!user) {
+//         console.error(`User with ID ${userId} not found.`);
+//         return;
+//       }
+//       console.log("selected user",user);
   
-      let newEndDate;
-      const currentDate = new Date();
-      console.log(currentDate)
+//       let newEndDate;
+//       const currentDate = new Date();
+//       console.log(currentDate)
+//       console.log("user is paying for a plan called".planname)
   
-      switch (planType) {
-        case "monthly":
-          newEndDate = new Date(currentDate.setDate(currentDate.getDate() + 31));
-          break;
-        case "yearly":
-          newEndDate = new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
-          break;
-        case "Daily":
-          newEndDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
-          break;
+//       switch (planname) {
+//         case "Daily":
+//           newEndDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
+//           break;
+//         case "yearly":
+//           newEndDate = new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
+//           break;
+//         case "Daily":
+//           newEndDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
+//           break;
         
-        default:
-          // Default plan: add 7 days from account creation date
-          newEndDate = new Date(user.created_at);
-          newEndDate.setDate(newEndDate.getDate() + 7);
-          break;
-      }
+//         default:
+//           // Default plan: add 7 days from account creation date
+//           newEndDate = new Date(user.created_at);
+//           newEndDate.setDate(newEndDate.getDate() + 7);
+//           break;
+//       }
   
-      user.plan = planid;
-      // user.subscriptionStartDate = currentDate;
-      // user.subscriptionEndDate = newEndDate;
-      user.transactionStatus = true; // Assuming this is set to success upon payment
+//       user.plan = planid;
+//       user.subscriptionStartDate = currentDate;
+//       user.subscriptionEndDate = newEndDate;
+//       user.transactionStatus = true; // Assuming this is set to success upon payment
   
-      await user.save();
+//       await user.save();
   
-      console.log(`User ${userId} updated with plan ${planType}.`);
-      console.log('userdata',user)
-    } catch (error) {
-      console.error("Error updating user plan:", error);
+//       console.log(`User ${userId} updated with plan ${planname}.`);
+//       console.log('userdata',user)
+//     } catch (error) {
+//       console.error("Error updating user plan:", error);
+//     }
+//   };
+
+const updateUserPlan = async (userId, planid, planname) => {
+  console.log("my plan type", planid);
+  console.log("my plan name", planname);
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      console.error(`User with ID ${userId} not found.`);
+      return;
     }
-  };
+    console.log("selected user", user);
+
+    const currentDate = new Date();
+    console.log(currentDate);
+    console.log("user is paying for a plan called", planname);
+
+    let newEndDate = new Date(currentDate); // Create a copy of currentDate
+
+    switch (planname) {
+      case "Daily":
+        newEndDate.setDate(currentDate.getDate() + 1);
+        break;
+      case "yearly":
+        newEndDate.setFullYear(currentDate.getFullYear() + 1);
+        break;
+      case "monthly":
+        newEndDate.setMonth(currentDate.getMonth() + 1);
+        break;
+      default:
+        // Default plan: add 7 days from account creation date
+        newEndDate = new Date(user.created_at);
+        newEndDate.setDate(newEndDate.getDate() + 7);
+        break;
+    }
+
+    user.plan = planid;
+    user.subscriptionStartDate = currentDate;
+    user.subscriptionEndDate = newEndDate;
+    user.transactionStatus = true; // Assuming this is set to success upon payment
+
+    await user.save();
+
+    console.log(`User ${userId} updated with plan ${planname}.`);
+    console.log("userdata", user);
+  } catch (error) {
+    console.error("Error updating user plan:", error);
+  }
+};
+
 
 module.exports = {
   getToken,
