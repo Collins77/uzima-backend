@@ -10,11 +10,11 @@ const { getPlanbyId } = require('./planController');
 
 
 
-const clientId = "nu5bmWoWpUzZGEtz3LRmIuYFwpog1TvHbZAGPxdq";
-const clientSecret = "Rdr7i9oUtNpdHUfM3jTYXEE2hEPzxK6P7E624B443fJHmwL1gElF87YZftv1W2phxgpK9WOFkUUFVHFZpU0K4i9XxUuTStaLByP3ohoy4yQiTkdgmtEolMnJetORRyiN";
+const clientId = "FhIs8TMKTYqEiurheIZjh9rgnOLFugLeXvTkCcz8";
+const clientSecret = "tI43g1ExbEva6ewZgcj9QsiMPgH75ylFoD0WJaUoZGqHJncrXUuMYrh6EegOOBM08vYT5xzyt81GtYEA4gslKWlQ0Jc9RXmKA743Hcio4Gh5vdzZ3pc74VMJSsmYg2B0";
 const tokenUrl = "https://sandbox.sasapay.app/api/v1/auth/token/?grant_type=client_credentials";
 const confirmUrl = "https://7626-197-232-60-144.ngrok-free.app/confirm";
-const callbackurl = "https://bf81-41-139-202-31.ngrok-free.app/api/payment/c2b-callback-results";
+const callbackurl = "https://0edd-197-232-60-144.ngrok-free.app/api/payment/c2b-callback-results";
 
 // Convert the credentials
 const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
@@ -61,7 +61,9 @@ const requestPayment = async (req, res) => {
       planid
     } = req.body;
     const planType = await getPlanbyId(planid);
-    console.log('plan details',planType.name)
+    console.log("The plan", planType)
+    const planName=planType.name;
+    console.log('plan details',planName)
 
     console.log("Request body:", req.body);
 
@@ -119,14 +121,16 @@ const handleCallback = async (req, res) => {
     const paymentData = req.query.paymentData;
     const jsonString = decodeURIComponent(paymentData);
     const jsonData = JSON.parse(jsonString);
+    const username = jsonData.paymentDetails.userId;
     console.log("decoded data", jsonData);
+    console.log("decoded username", username);
   
     if (callbackData.ResultCode == 0) {
       console.log("A successful transaction");
       try {
         const transactionId = callbackData.CheckoutRequestID;
         // const planType = "daily"; // Example: you can determine this from the transaction details or request
-        await updateUserPlan(jsonData.userId,jsonData.planType);
+        await updateUserPlan(jsonData.paymentDetails.userId,jsonData.paymentDetails.planid);
         console.log('Transaction ID', transactionId);
         res.status(200).json("ok");
       } catch (error) {
@@ -144,15 +148,17 @@ const handleCallback = async (req, res) => {
 
 //choose plan and update dates
 // Function to update user's plan
-const updateUserPlan = async (userId, planType) => {
-  console.log(planType);
+const updateUserPlan = async (userId, planid) => {
+  console.log("my plan type",planid);
     try {
       const user = await User.findById(userId);
+      
   
       if (!user) {
         console.error(`User with ID ${userId} not found.`);
         return;
       }
+      console.log("selected user",user);
   
       let newEndDate;
       const currentDate = new Date();
@@ -176,7 +182,7 @@ const updateUserPlan = async (userId, planType) => {
           break;
       }
   
-      user.plan = planType;
+      user.plan = planid;
       // user.subscriptionStartDate = currentDate;
       // user.subscriptionEndDate = newEndDate;
       user.transactionStatus = true; // Assuming this is set to success upon payment
@@ -184,6 +190,7 @@ const updateUserPlan = async (userId, planType) => {
       await user.save();
   
       console.log(`User ${userId} updated with plan ${planType}.`);
+      console.log('userdata',user)
     } catch (error) {
       console.error("Error updating user plan:", error);
     }

@@ -61,6 +61,7 @@ const userChatsRoutes = require('./routes/userChatsRoutes');
 const assistantRoutes = require('./routes/assistantRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const rapidRoutes = require('./routes/rapidRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 
 
 app.use('/api/users', userRoutes);
@@ -72,6 +73,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/userchats', userChatsRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/personality', rapidRoutes);
+app.use('/api/events', eventRoutes);
 // app.use('/api/assistant', assistantRoutes);
 
 app.listen(port, () => {
