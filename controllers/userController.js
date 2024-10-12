@@ -13,6 +13,7 @@ const register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
   // Basic validation
+
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ message: 'Please provide all required fields' });
   }
