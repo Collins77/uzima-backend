@@ -8,7 +8,7 @@ const nodemailer = require('nodemailer');
 //     }
 // });
 
-const transporter = nodeMailer.createTransport({
+const transporter = nodemailer.createTransport({
     // host: 'smtp.titan.email',
     host:'mail.uzima.ai',
     port: 465,
